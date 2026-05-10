@@ -699,9 +699,11 @@
             // Conversión a escala de grises estándar
             let gray = Math.round(0.299 * data[j] + 0.587 * data[j + 1] + 0.114 * data[j + 2]);
 
-            // --- MEJORA CRÍTICA ---
-            // Si el píxel es oscuro (ruido de cámara < 50), forzarlo a 0 (negro absoluto).
-            // Si no haces esto, el HOG detecta "bordes" donde solo hay sombra.
+            // INVERSIÓN: Si el fondo es claro, lo convertimos a oscuro
+            // Fashion-MNIST: Objeto (255) sobre Fondo (0)
+            gray = 255 - gray;
+
+            // Limpieza de ruido después de invertir
             if (gray < 50) gray = 0;
 
             pixels.push(gray);
