@@ -20,7 +20,6 @@ import numpy as np
 from skimage.feature import hog
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
-CORS(app)
 
 # --------------------------------------------------------------
 # Configuracion
@@ -71,6 +70,12 @@ def extract_hog_features(X: np.ndarray) -> np.ndarray:
 # App Flask
 # --------------------------------------------------------------
 app = Flask(__name__)
+CORS(app)
+load_pipeline()
+
+@app.route('/')
+def index():
+    return send_from_directory('.', 'index.html')
 
 # -- GET / -----------------------------------------------------
 @app.route('/')
