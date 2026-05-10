@@ -19,6 +19,8 @@ import joblib
 import numpy as np
 from skimage.feature import hog
 from flask import Flask, jsonify, request, send_from_directory
+from flask_cors import CORS
+CORS(app)
 
 # --------------------------------------------------------------
 # Configuracion
