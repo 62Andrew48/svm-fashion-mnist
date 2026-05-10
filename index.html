@@ -1,20 +1,29 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Clasificador de Prendas — SVM</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400&display=swap"
+    rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     :root {
       --bg: #0d0d0d;
       --surface: #161616;
       --surface2: #1e1e1e;
-      --border: rgba(255,255,255,0.08);
-      --border-hover: rgba(255,255,255,0.18);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.18);
       --text: #f0ede6;
       --muted: #6b6b6b;
       --accent: #f0ede6;
@@ -25,8 +34,18 @@
       --font-mono: 'DM Mono', 'Courier New', monospace;
     }
 
-    html { background: var(--bg); color: var(--text); font-family: var(--font-mono); font-size: 14px; }
-    body { min-height: 100vh; display: flex; flex-direction: column; }
+    html {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 14px;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
     /* ── Header ── */
     header {
@@ -36,6 +55,7 @@
       justify-content: space-between;
       align-items: flex-end;
     }
+
     .logo {
       font-family: var(--font-display);
       font-size: 1.6rem;
@@ -43,7 +63,12 @@
       color: var(--text);
       line-height: 1;
     }
-    .logo em { font-style: italic; color: var(--muted); }
+
+    .logo em {
+      font-style: italic;
+      color: var(--muted);
+    }
+
     .meta {
       font-size: 11px;
       color: var(--muted);
@@ -51,10 +76,11 @@
       line-height: 1.8;
       letter-spacing: 0.5px;
     }
+
     .accuracy-pill {
       display: inline-block;
-      background: rgba(74,222,128,0.1);
-      border: 1px solid rgba(74,222,128,0.25);
+      background: rgba(74, 222, 128, 0.1);
+      border: 1px solid rgba(74, 222, 128, 0.25);
       color: var(--success);
       font-size: 10px;
       letter-spacing: 1px;
@@ -63,10 +89,18 @@
     }
 
     /* ── Main layout ── */
-    main { flex: 1; display: grid; grid-template-columns: 1fr 340px; min-height: 0; }
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      min-height: 0;
+    }
 
     /* ── Left panel ── */
-    .panel-left { padding: 2.5rem 3rem; border-right: 1px solid var(--border); }
+    .panel-left {
+      padding: 2.5rem 3rem;
+      border-right: 1px solid var(--border);
+    }
 
     .section-label {
       font-size: 10px;
@@ -86,7 +120,11 @@
       overflow: hidden;
       transition: border-color 0.2s;
     }
-    .endpoint-row:focus-within { border-color: var(--border-hover); }
+
+    .endpoint-row:focus-within {
+      border-color: var(--border-hover);
+    }
+
     .endpoint-prefix {
       padding: 10px 12px;
       background: var(--surface2);
@@ -95,6 +133,7 @@
       white-space: nowrap;
       border-right: 1px solid var(--border);
     }
+
     #apiUrl {
       flex: 1;
       background: var(--surface);
@@ -105,7 +144,10 @@
       font-size: 12px;
       padding: 10px 14px;
     }
-    #apiUrl::placeholder { color: var(--muted); }
+
+    #apiUrl::placeholder {
+      color: var(--muted);
+    }
 
     /* Drop zone */
     .drop-zone {
@@ -119,26 +161,40 @@
       background: var(--surface);
       margin-bottom: 2rem;
     }
-    .drop-zone:hover, .drop-zone.drag-over {
+
+    .drop-zone:hover,
+    .drop-zone.drag-over {
       background: var(--surface2);
-      border-color: rgba(255,255,255,0.3);
+      border-color: rgba(255, 255, 255, 0.3);
     }
+
     .drop-zone input {
-      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%;
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
     }
+
     .drop-icon {
       font-size: 2rem;
       margin-bottom: 1rem;
       display: block;
       opacity: 0.4;
     }
+
     .drop-title {
       font-family: var(--font-display);
       font-size: 1.1rem;
       margin-bottom: 6px;
       color: var(--text);
     }
-    .drop-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.5px; }
+
+    .drop-sub {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+    }
 
     /* Preview grid */
     .preview-grid {
@@ -147,6 +203,7 @@
       gap: 10px;
       margin-bottom: 2rem;
     }
+
     .preview-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -155,15 +212,24 @@
       position: relative;
       transition: border-color 0.2s;
     }
-    .preview-card:hover { border-color: var(--border-hover); }
+
+    .preview-card:hover {
+      border-color: var(--border-hover);
+    }
+
     .preview-card img {
-      width: 100%; aspect-ratio: 1;
+      width: 100%;
+      aspect-ratio: 1;
       object-fit: contain;
       display: block;
       background: var(--surface2);
       image-rendering: pixelated;
     }
-    .card-footer { padding: 6px 8px; }
+
+    .card-footer {
+      padding: 6px 8px;
+    }
+
     .card-name {
       font-size: 10px;
       color: var(--muted);
@@ -172,6 +238,7 @@
       text-overflow: ellipsis;
       margin-bottom: 4px;
     }
+
     .card-badge {
       font-size: 10px;
       letter-spacing: 0.5px;
@@ -180,28 +247,78 @@
       align-items: center;
       gap: 4px;
     }
-    .card-badge.success { color: var(--success); }
-    .card-badge.error { color: var(--error); }
-    .card-badge.loading { color: var(--warning); }
-    .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
-    .dot.pulse { animation: pulse 1s ease-in-out infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .card-badge.success {
+      color: var(--success);
+    }
+
+    .card-badge.error {
+      color: var(--error);
+    }
+
+    .card-badge.loading {
+      color: var(--warning);
+    }
+
+    .dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+
+    .dot.pulse {
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.3
+      }
+    }
 
     .remove-btn {
-      position: absolute; top: 5px; right: 5px;
-      width: 18px; height: 18px;
-      background: rgba(13,13,13,0.8);
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 18px;
+      height: 18px;
+      background: rgba(13, 13, 13, 0.8);
       border: 1px solid var(--border);
       border-radius: 2px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; color: var(--muted); font-size: 11px;
-      line-height: 1; opacity: 0; transition: opacity 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1;
+      opacity: 0;
+      transition: opacity 0.15s;
     }
-    .preview-card:hover .remove-btn { opacity: 1; }
-    .remove-btn:hover { color: var(--text); border-color: var(--border-hover); }
+
+    .preview-card:hover .remove-btn {
+      opacity: 1;
+    }
+
+    .remove-btn:hover {
+      color: var(--text);
+      border-color: var(--border-hover);
+    }
 
     /* Action buttons */
-    .actions { display: flex; gap: 10px; }
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+
     .btn {
       font-family: var(--font-mono);
       font-size: 12px;
@@ -212,20 +329,35 @@
       border: 1px solid;
       transition: background 0.15s, opacity 0.15s;
     }
+
     .btn-primary {
       background: var(--text);
       color: var(--bg);
       border-color: var(--text);
       flex: 1;
     }
-    .btn-primary:hover:not(:disabled) { background: #d4d1ca; border-color: #d4d1ca; }
-    .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #d4d1ca;
+      border-color: #d4d1ca;
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
     .btn-ghost {
       background: transparent;
       color: var(--muted);
       border-color: var(--border);
     }
-    .btn-ghost:hover { color: var(--text); border-color: var(--border-hover); background: var(--surface2); }
+
+    .btn-ghost:hover {
+      color: var(--text);
+      border-color: var(--border-hover);
+      background: var(--surface2);
+    }
 
     /* ── Right panel ── */
     .panel-right {
@@ -236,19 +368,38 @@
       background: var(--surface);
     }
 
-    .stat-block { display: flex; flex-direction: column; gap: 4px; }
+    .stat-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
     .stat-value {
       font-family: var(--font-display);
       font-size: 2rem;
       line-height: 1;
       color: var(--text);
     }
-    .stat-label { font-size: 10px; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; }
 
-    .divider { height: 1px; background: var(--border); }
+    .stat-label {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+    }
 
     /* Log */
-    .log-list { display: flex; flex-direction: column; gap: 8px; }
+    .log-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
     .log-item {
       display: flex;
       justify-content: space-between;
@@ -257,9 +408,28 @@
       padding-bottom: 8px;
       border-bottom: 1px solid var(--border);
     }
-    .log-item:last-child { border-bottom: none; padding-bottom: 0; }
-    .log-file { font-size: 11px; color: var(--muted); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .log-label { font-size: 11px; color: var(--text); text-align: right; flex-shrink: 0; }
+
+    .log-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .log-file {
+      font-size: 11px;
+      color: var(--muted);
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .log-label {
+      font-size: 11px;
+      color: var(--text);
+      text-align: right;
+      flex-shrink: 0;
+    }
 
     .empty-log {
       font-size: 12px;
@@ -280,241 +450,271 @@
 
     /* ── Responsive ── */
     @media (max-width: 768px) {
-      main { grid-template-columns: 1fr; }
-      .panel-right { border-top: 1px solid var(--border); }
-      header { flex-direction: column; align-items: flex-start; gap: 1rem; }
-      .panel-left, header, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-right {
+        border-top: 1px solid var(--border);
+      }
+
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .panel-left,
+      header,
+      footer {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+      }
     }
   </style>
 </head>
+
 <body>
 
-<header>
-  <div class="logo">Clasificador <em>de Prendas</em></div>
-  <div class="meta">
-    SVM — RBF Kernel · PCA(300) · HOG + Píxeles<br>
-    Fashion-MNIST · 70,000 imágenes<br>
-    <span class="accuracy-pill">ACCURACY 91.11%</span>
-  </div>
-</header>
+  <header>
+    <div class="logo">Clasificador <em>de Prendas</em></div>
+    <div class="meta">
+      SVM — RBF Kernel · PCA(300) · HOG + Píxeles<br>
+      Fashion-MNIST · 70,000 imágenes<br>
+      <span class="accuracy-pill">ACCURACY 91.11%</span>
+    </div>
+  </header>
 
-<main>
-  <!-- ── Left panel ── -->
-  <div class="panel-left">
+  <main>
+    <!-- ── Left panel ── -->
+    <div class="panel-left">
 
-    <p class="section-label">Endpoint</p>
-    <div class="endpoint-row">
-      <span class="endpoint-prefix">URL</span>
-      <input type="text" id="apiUrl" placeholder="https://svm-fashion-mnist.onrender.com" />
+      <p class="section-label">Endpoint</p>
+      <div class="endpoint-row">
+        <span class="endpoint-prefix">URL</span>
+        <input type="text" id="apiUrl" placeholder="https://svm-fashion-mnist.onrender.com" />
+      </div>
+
+      <p class="section-label">Imágenes</p>
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" accept="image/*" multiple />
+        <span class="drop-icon">↑</span>
+        <p class="drop-title">Arrastra tus imágenes</p>
+        <p class="drop-sub">o haz clic para seleccionar &nbsp;·&nbsp; PNG &nbsp;JPG &nbsp;WEBP</p>
+      </div>
+
+      <div class="preview-grid" id="previewGrid"></div>
+
+      <div class="actions" id="actions" style="display:none;">
+        <button class="btn btn-primary" id="predictBtn">CLASIFICAR</button>
+        <button class="btn btn-ghost" id="clearBtn">LIMPIAR</button>
+      </div>
+
     </div>
 
-    <p class="section-label">Imágenes</p>
-    <div class="drop-zone" id="dropZone">
-      <input type="file" id="fileInput" accept="image/*" multiple />
-      <span class="drop-icon">↑</span>
-      <p class="drop-title">Arrastra tus imágenes</p>
-      <p class="drop-sub">o haz clic para seleccionar &nbsp;·&nbsp; PNG &nbsp;JPG &nbsp;WEBP</p>
-    </div>
+    <!-- ── Right panel ── -->
+    <div class="panel-right">
 
-    <div class="preview-grid" id="previewGrid"></div>
-
-    <div class="actions" id="actions" style="display:none;">
-      <button class="btn btn-primary" id="predictBtn">CLASIFICAR</button>
-      <button class="btn btn-ghost" id="clearBtn">LIMPIAR</button>
-    </div>
-
-  </div>
-
-  <!-- ── Right panel ── -->
-  <div class="panel-right">
-
-    <div>
-      <p class="section-label">Resultados</p>
-      <div style="display:flex; gap:2rem; margin-bottom:1.5rem;">
-        <div class="stat-block">
-          <span class="stat-value" id="statTotal">0</span>
-          <span class="stat-label">Imágenes</span>
-        </div>
-        <div class="stat-block">
-          <span class="stat-value" id="statDone">—</span>
-          <span class="stat-label">Clasificadas</span>
-        </div>
-        <div class="stat-block">
-          <span class="stat-value" id="statTime">—</span>
-          <span class="stat-label">Segundos</span>
+      <div>
+        <p class="section-label">Resultados</p>
+        <div style="display:flex; gap:2rem; margin-bottom:1.5rem;">
+          <div class="stat-block">
+            <span class="stat-value" id="statTotal">0</span>
+            <span class="stat-label">Imágenes</span>
+          </div>
+          <div class="stat-block">
+            <span class="stat-value" id="statDone">—</span>
+            <span class="stat-label">Clasificadas</span>
+          </div>
+          <div class="stat-block">
+            <span class="stat-value" id="statTime">—</span>
+            <span class="stat-label">Segundos</span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="divider"></div>
+      <div class="divider"></div>
 
-    <div>
-      <p class="section-label" style="margin-bottom:1rem;">Registro</p>
-      <div class="log-list" id="logList">
-        <p class="empty-log">Sin resultados aún.</p>
+      <div>
+        <p class="section-label" style="margin-bottom:1rem;">Registro</p>
+        <div class="log-list" id="logList">
+          <p class="empty-log">Sin resultados aún.</p>
+        </div>
       </div>
-    </div>
 
-    <div class="divider"></div>
+      <div class="divider"></div>
 
-    <div>
-      <p class="section-label" style="margin-bottom:0.75rem;">Clases</p>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px 16px; font-size:11px; color:var(--muted);">
-        <span>0 — T-shirt/Top</span><span>5 — Sandal</span>
-        <span>1 — Trouser</span><span>6 — Shirt</span>
-        <span>2 — Pullover</span><span>7 — Sneaker</span>
-        <span>3 — Dress</span><span>8 — Bag</span>
-        <span>4 — Coat</span><span>9 — Ankle boot</span>
+      <div>
+        <p class="section-label" style="margin-bottom:0.75rem;">Clases</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px 16px; font-size:11px; color:var(--muted);">
+          <span>0 — T-shirt/Top</span><span>5 — Sandal</span>
+          <span>1 — Trouser</span><span>6 — Shirt</span>
+          <span>2 — Pullover</span><span>7 — Sneaker</span>
+          <span>3 — Dress</span><span>8 — Bag</span>
+          <span>4 — Coat</span><span>9 — Ankle boot</span>
+        </div>
       </div>
+
     </div>
+  </main>
 
-  </div>
-</main>
+  <footer>
+    <span>Andrew Garcés · SVM Fashion-MNIST</span>
+    <span>Render · Hugging Face · GitHub</span>
+  </footer>
 
-<footer>
-  <span>Andrew Garcés · SVM Fashion-MNIST</span>
-  <span>Render · Hugging Face · GitHub</span>
-</footer>
+  <script>
+    const LABELS = ['T-shirt/Top', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot'];
 
-<script>
-  const LABELS = ['T-shirt/Top','Trouser','Pullover','Dress','Coat','Sandal','Shirt','Sneaker','Bag','Ankle boot'];
+    const fileInput = document.getElementById('fileInput');
+    const dropZone = document.getElementById('dropZone');
+    const previewGrid = document.getElementById('previewGrid');
+    const actions = document.getElementById('actions');
+    const predictBtn = document.getElementById('predictBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const logList = document.getElementById('logList');
+    const statTotal = document.getElementById('statTotal');
+    const statDone = document.getElementById('statDone');
+    const statTime = document.getElementById('statTime');
+    const apiUrl = document.getElementById('apiUrl');
 
-  const fileInput   = document.getElementById('fileInput');
-  const dropZone    = document.getElementById('dropZone');
-  const previewGrid = document.getElementById('previewGrid');
-  const actions     = document.getElementById('actions');
-  const predictBtn  = document.getElementById('predictBtn');
-  const clearBtn    = document.getElementById('clearBtn');
-  const logList     = document.getElementById('logList');
-  const statTotal   = document.getElementById('statTotal');
-  const statDone    = document.getElementById('statDone');
-  const statTime    = document.getElementById('statTime');
-  const apiUrl      = document.getElementById('apiUrl');
+    let files = [];
 
-  let files = [];
-
-  // ── Drag & drop ──
-  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-  dropZone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropZone.classList.remove('drag-over');
-    addFiles([...e.dataTransfer.files].filter(f => f.type.startsWith('image/')));
-  });
-  fileInput.addEventListener('change', () => { addFiles([...fileInput.files]); fileInput.value = ''; });
-
-  function addFiles(newFiles) {
-    newFiles.forEach(f => {
-      if (!files.find(x => x.name === f.name && x.size === f.size)) files.push(f);
+    // ── Drag & drop ──
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      addFiles([...e.dataTransfer.files].filter(f => f.type.startsWith('image/')));
     });
-    render();
-  }
+    fileInput.addEventListener('change', () => { addFiles([...fileInput.files]); fileInput.value = ''; });
 
-  function removeFile(idx) { files.splice(idx, 1); render(); }
+    function addFiles(newFiles) {
+      newFiles.forEach(f => {
+        if (!files.find(x => x.name === f.name && x.size === f.size)) files.push(f);
+      });
+      render();
+    }
 
-  function render() {
-    previewGrid.innerHTML = '';
-    files.forEach((f, i) => {
-      const url = URL.createObjectURL(f);
-      const card = document.createElement('div');
-      card.className = 'preview-card';
-      card.id = `card-${i}`;
-      card.innerHTML = `
+    function removeFile(idx) { files.splice(idx, 1); render(); }
+
+    function render() {
+      previewGrid.innerHTML = '';
+      files.forEach((f, i) => {
+        const url = URL.createObjectURL(f);
+        const card = document.createElement('div');
+        card.className = 'preview-card';
+        card.id = `card-${i}`;
+        card.innerHTML = `
         <img src="${url}" alt="${f.name}" />
         <div class="card-footer">
           <p class="card-name">${f.name}</p>
           <div class="card-badge" id="badge-${i}"><span class="dot"></span>—</div>
         </div>
         <button class="remove-btn" onclick="removeFile(${i})" title="Eliminar">✕</button>`;
-      previewGrid.appendChild(card);
+        previewGrid.appendChild(card);
+      });
+      statTotal.textContent = files.length;
+      statDone.textContent = '—';
+      statTime.textContent = '—';
+      actions.style.display = files.length ? 'flex' : 'none';
+      if (!files.length) resetLog();
+    }
+
+    function resetLog() {
+      logList.innerHTML = '<p class="empty-log">Sin resultados aún.</p>';
+    }
+
+    clearBtn.addEventListener('click', () => { files = []; render(); });
+
+    // ── Predict ──
+    predictBtn.addEventListener('click', async () => {
+      const base = (apiUrl.value.trim() || 'https://svm-fashion-mnist.onrender.com').replace(/\/$/, '');
+      predictBtn.disabled = true;
+      predictBtn.textContent = 'PROCESANDO…';
+      logList.innerHTML = '';
+
+      const t0 = Date.now();
+      let done = 0;
+
+      await Promise.all(files.map(async (f, i) => {
+        const badge = document.getElementById(`badge-${i}`);
+        badge.className = 'card-badge loading';
+        badge.innerHTML = '<span class="dot pulse"></span> …';
+
+        try {
+          const pixels = await imgToPixels(f);
+          const res = await fetch(`${base}/predict`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pixels })
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          const label = data.label ?? data.prediction?.class_name ?? LABELS[data.prediction] ?? `Clase ${data.prediction}`;
+          badge.className = 'card-badge success';
+          badge.innerHTML = `<span class="dot"></span>${label}`;
+          addLog(f.name, label, true);
+          done++;
+        } catch (err) {
+          badge.className = 'card-badge error';
+          badge.innerHTML = '<span class="dot"></span>Error';
+          addLog(f.name, 'Error de conexión', false);
+        }
+      }));
+
+      const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+      statDone.textContent = done;
+      statTime.textContent = elapsed;
+      predictBtn.disabled = false;
+      predictBtn.textContent = 'CLASIFICAR';
     });
-    statTotal.textContent = files.length;
-    statDone.textContent = '—';
-    statTime.textContent = '—';
-    actions.style.display = files.length ? 'flex' : 'none';
-    if (!files.length) resetLog();
-  }
 
-  function resetLog() {
-    logList.innerHTML = '<p class="empty-log">Sin resultados aún.</p>';
-  }
-
-  clearBtn.addEventListener('click', () => { files = []; render(); });
-
-  // ── Predict ──
-  predictBtn.addEventListener('click', async () => {
-    const base = (apiUrl.value.trim() || 'https://svm-fashion-mnist.onrender.com').replace(/\/$/, '');
-    predictBtn.disabled = true;
-    predictBtn.textContent = 'PROCESANDO…';
-    logList.innerHTML = '';
-
-    const t0 = Date.now();
-    let done = 0;
-
-    await Promise.all(files.map(async (f, i) => {
-      const badge = document.getElementById(`badge-${i}`);
-      badge.className = 'card-badge loading';
-      badge.innerHTML = '<span class="dot pulse"></span> …';
-
-      try {
-        const pixels = await imgToPixels(f);
-        const res = await fetch(`${base}/predict`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pixels })
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        const label = data.label ?? data.prediction?.class_name ?? LABELS[data.prediction] ?? `Clase ${data.prediction}`;
-        badge.className = 'card-badge success';
-        badge.innerHTML = `<span class="dot"></span>${label}`;
-        addLog(f.name, label, true);
-        done++;
-      } catch (err) {
-        badge.className = 'card-badge error';
-        badge.innerHTML = '<span class="dot"></span>Error';
-        addLog(f.name, 'Error de conexión', false);
-      }
-    }));
-
-    const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
-    statDone.textContent = done;
-    statTime.textContent = elapsed;
-    predictBtn.disabled = false;
-    predictBtn.textContent = 'CLASIFICAR';
-  });
-
-  function addLog(filename, label, ok) {
-    const el = document.createElement('div');
-    el.className = 'log-item';
-    el.innerHTML = `
+    function addLog(filename, label, ok) {
+      const el = document.createElement('div');
+      el.className = 'log-item';
+      el.innerHTML = `
       <span class="log-file" title="${filename}">${filename}</span>
       <span class="log-label" style="color:${ok ? 'var(--success)' : 'var(--error)'}">${label}</span>`;
-    logList.appendChild(el);
-  }
+      logList.appendChild(el);
+    }
 
-  // ── Image → 28×28 grayscale pixels ──
-  function imgToPixels(file) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const url = URL.createObjectURL(file);
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = 28; canvas.height = 28;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, 28, 28);
-        const data = ctx.getImageData(0, 0, 28, 28).data;
-        const pixels = [];
-        for (let j = 0; j < data.length; j += 4) {
-          pixels.push(Math.round(0.299 * data[j] + 0.587 * data[j+1] + 0.114 * data[j+2]));
-        }
-        URL.revokeObjectURL(url);
-        resolve(pixels);
-      };
-      img.onerror = () => reject(new Error('No se pudo cargar la imagen'));
-      img.src = url;
-    });
-  }
-</script>
+    // ── Image → 28×28 grayscale pixels ──
+    function imgToPixels(file) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = 28; canvas.height = 28;
+          const ctx = canvas.getContext('2d');
+
+          // 1. Dibujar la imagen
+          ctx.drawImage(img, 0, 0, 28, 28);
+          const data = ctx.getImageData(0, 0, 28, 28).data;
+          const pixels = [];
+
+          for (let j = 0; j < data.length; j += 4) {
+            // Conversión a escala de grises estándar
+            let gray = Math.round(0.299 * data[j] + 0.587 * data[j + 1] + 0.114 * data[j + 2]);
+
+            // --- MEJORA CRÍTICA ---
+            // Si el píxel es oscuro (ruido de cámara < 50), forzarlo a 0 (negro absoluto).
+            // Si no haces esto, el HOG detecta "bordes" donde solo hay sombra.
+            if (gray < 50) gray = 0;
+
+            pixels.push(gray);
+          }
+
+          URL.revokeObjectURL(url);
+          resolve(pixels);
+        };
+        img.onerror = () => reject(new Error('No se pudo cargar la imagen'));
+        img.src = url;
+      });
+    }
+  </script>
 </body>
+
 </html>
