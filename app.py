@@ -18,7 +18,7 @@ from pathlib import Path
 import joblib
 import numpy as np
 from skimage.feature import hog
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 
 # --------------------------------------------------------------
 # Configuracion
@@ -69,6 +69,11 @@ def extract_hog_features(X: np.ndarray) -> np.ndarray:
 # App Flask
 # --------------------------------------------------------------
 app = Flask(__name__)
+
+# -- GET / -----------------------------------------------------
+@app.route('/')
+def index():
+    return send_from_directory('.', 'index.html')
 
 def model_ready() -> bool:
     return pipeline is not None
@@ -166,6 +171,7 @@ if __name__ == "__main__":
     print("=" * 60)
     load_pipeline()
     print(f"\n   Servidor en http://0.0.0.0:{PORT}")
+    print(f"    GET  /")
     print(f"    GET  /health")
     print(f"    POST /predict")
     print(f"    POST /predict/batch\n")
