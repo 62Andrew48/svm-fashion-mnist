@@ -1,18 +1,15 @@
 """
 app.py — API REST Flask para SVM Fashion-MNIST con features HOG
 ===============================================================
-Requisito previo: ejecutar entrenamiento.py para generar model.pkl
-
-Uso:
-    python app.py
-
 Endpoints:
+    GET  /                 -> sirve index.html
     GET  /health           -> estado del servicio
     POST /predict          -> predice 1 imagen  {"pixels": [784 floats]}
     POST /predict/batch    -> predice N imagenes {"images": [[784 floats], ...]}
 """
 
 import os
+import urllib.request
 from pathlib import Path
 
 import joblib
@@ -25,6 +22,7 @@ from flask_cors import CORS
 # Configuracion
 # --------------------------------------------------------------
 MODEL_PATH = Path(os.getenv("MODEL_PATH", "model.pkl"))
+MODEL_URL  = os.getenv("MODEL_URL", "")
 PORT       = int(os.getenv("PORT", 5000))
 
 CLASS_NAMES = [
@@ -33,18 +31,31 @@ CLASS_NAMES = [
 ]
 
 # --------------------------------------------------------------
-# Cargar pipeline al iniciar
+# Cargar pipeline (descarga desde Hugging Face si no existe)
 # --------------------------------------------------------------
 pipeline = None
 
 def load_pipeline() -> None:
     global pipeline
+
     if not MODEL_PATH.exists():
-        print(f"   No se encontro '{MODEL_PATH}'.")
-        print("    Ejecuta primero: python entrenamiento.py")
-        return
-    pipeline = joblib.load(MODEL_PATH)
-    print(f"    Pipeline cargado desde '{MODEL_PATH}'")
+        if MODEL_URL:
+            print(f"   Descargando modelo desde Hugging Face...")
+            try:
+                urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
+                print(f"   Descarga completa: {MODEL_PATH} ({MODEL_PATH.stat().st_size // 1_000_000} MB)")
+            except Exception as e:
+                print(f"   Error al descargar el modelo: {e}")
+                return
+        else:
+            print(f"   No se encontro '{MODEL_PATH}' y MODEL_URL no esta definida.")
+            return
+
+    try:
+        pipeline = joblib.load(MODEL_PATH)
+        print(f"   Pipeline cargado correctamente desde '{MODEL_PATH}'")
+    except Exception as e:
+        print(f"   Error al cargar el pipeline: {e}")
 
 # --------------------------------------------------------------
 # HOG + pixeles (misma funcion que en entrenamiento.py)
@@ -65,7 +76,6 @@ def extract_hog_features(X: np.ndarray) -> np.ndarray:
     X_norm = X.astype(np.float32) / 255.0
     return np.hstack([hog_feats, X_norm])
 
-
 # --------------------------------------------------------------
 # App Flask
 # --------------------------------------------------------------
@@ -73,15 +83,9 @@ app = Flask(__name__)
 CORS(app)
 load_pipeline()
 
-@app.route('/')
-def index():
-    return send_from_directory('.', 'index.html')
-
-# -- GET / -----------------------------------------------------
-@app.route('/')
-def index():
-    return send_from_directory('.', 'index.html')
-
+# --------------------------------------------------------------
+# Helpers
+# --------------------------------------------------------------
 def model_ready() -> bool:
     return pipeline is not None
 
@@ -90,9 +94,7 @@ def parse_pixels(data: list) -> np.ndarray:
     if arr.ndim == 1:
         arr = arr.reshape(1, -1)
     if arr.shape[1] != 784:
-        raise ValueError(
-            f"Se esperan 784 pixeles (28x28). Recibidos: {arr.shape[1]}"
-        )
+        raise ValueError(f"Se esperan 784 pixeles (28x28). Recibidos: {arr.shape[1]}")
     return arr
 
 def run_inference(pixels: np.ndarray) -> list:
@@ -103,7 +105,16 @@ def run_inference(pixels: np.ndarray) -> list:
         for p in preds
     ]
 
-# -- GET /health -----------------------------------------------
+# --------------------------------------------------------------
+# Rutas
+# --------------------------------------------------------------
+
+# GET / — sirve la interfaz web
+@app.route('/')
+def index():
+    return send_from_directory('.', 'index.html')
+
+# GET /health
 @app.get("/health")
 def health():
     return jsonify({
@@ -113,20 +124,11 @@ def health():
         "classes":      CLASS_NAMES,
     })
 
-# -- POST /predict ---------------------------------------------
+# POST /predict
 @app.post("/predict")
 def predict():
-    """
-    Predice la clase de UNA imagen.
-
-    Body JSON:
-        { "pixels": [0.0, 128.0, ...]  }   <- 784 valores (0-255)
-
-    Respuesta:
-        { "prediction": { "class_index": 7, "class_name": "Sneaker" } }
-    """
     if not model_ready():
-        return jsonify({"error": "Modelo no cargado. Ejecuta: python entrenamiento.py"}), 503
+        return jsonify({"error": "Modelo no cargado."}), 503
 
     body = request.get_json(silent=True)
     if not body or "pixels" not in body:
@@ -139,20 +141,11 @@ def predict():
     except (ValueError, TypeError) as exc:
         return jsonify({"error": str(exc)}), 422
 
-# -- POST /predict/batch ---------------------------------------
+# POST /predict/batch
 @app.post("/predict/batch")
 def predict_batch():
-    """
-    Predice la clase de VARIAS imagenes.
-
-    Body JSON:
-        { "images": [[784 floats], [784 floats], ...] }
-
-    Respuesta:
-        { "count": 2, "predictions": [{...}, {...}] }
-    """
     if not model_ready():
-        return jsonify({"error": "Modelo no cargado. Ejecuta: python entrenamiento.py"}), 503
+        return jsonify({"error": "Modelo no cargado."}), 503
 
     body = request.get_json(silent=True)
     if not body or "images" not in body:
@@ -170,16 +163,15 @@ def predict_batch():
         return jsonify({"error": str(exc)}), 422
 
 # --------------------------------------------------------------
-# Entry-point
+# Entry-point local
 # --------------------------------------------------------------
 if __name__ == "__main__":
     print("=" * 60)
     print("  API Flask -- SVM Fashion-MNIST")
     print("=" * 60)
-    load_pipeline()
     print(f"\n   Servidor en http://0.0.0.0:{PORT}")
-    print(f"    GET  /")
-    print(f"    GET  /health")
-    print(f"    POST /predict")
-    print(f"    POST /predict/batch\n")
+    print(f"   GET  /")
+    print(f"   GET  /health")
+    print(f"   POST /predict")
+    print(f"   POST /predict/batch\n")
     app.run(host="0.0.0.0", port=PORT, debug=False)
