@@ -465,7 +465,7 @@
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        const label = data.label ?? LABELS[data.prediction] ?? `Clase ${data.prediction}`;
+        const label = data.label ?? data.prediction?.class_name ?? LABELS[data.prediction] ?? `Clase ${data.prediction}`;
         badge.className = 'card-badge success';
         badge.innerHTML = `<span class="dot"></span>${label}`;
         addLog(f.name, label, true);
